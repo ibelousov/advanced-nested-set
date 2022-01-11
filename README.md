@@ -8,13 +8,17 @@
 
 Super nested set is laravel package, that can be used for handling nested tree sets like this:
 
+```php
 Category::first()->descendants; // print all nested categories of category
+```
 
 or like this
 
+```php
 Category::whereHas('parents', function($query) {
     $query->where('name', 'vegetables');
 });
+```
 
 ## Installation
 
