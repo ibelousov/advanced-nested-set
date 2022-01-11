@@ -40,7 +40,7 @@ So, you have Category model and wants to add to it nested set. For that purpose 
     public function up()
     {
         Schema::table('categories', function (Blueprint $table) {
-             $table->superNestedSet(); // create columns lft,rgt,depth,parent_id,deleted_at
+             $table->advancedNestedSet(); // create columns lft,rgt,depth,parent_id,deleted_at
         });
     }
 
@@ -52,7 +52,7 @@ So, you have Category model and wants to add to it nested set. For that purpose 
     public function down()
     {
         Schema::table('categories', function (Blueprint $table) {
-             $table->dropSuperNestedSet(); // delete columns lft,rgt,depth,parent_id,deleted_at
+             $table->dropAdvancedNestedSet(); // delete columns lft,rgt,depth,parent_id,deleted_at
         });
     }
 ```
@@ -102,9 +102,7 @@ $node = Category::create([...]); // Root node
 Category::create(['parent_id' => $node->id]); // Child of Root node
 ```
 
-```php
 - To move node from parent to root
-```
 
 ```php
 $category->update(['parent_id' => null]);

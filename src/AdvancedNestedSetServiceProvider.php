@@ -20,11 +20,11 @@ class AdvancedNestedSetServiceProvider extends ServiceProvider
 
     public function register()
     {
-        Blueprint::macro('superNestedSet', function () {
+        Blueprint::macro('advancedNestedSet', function () {
             MigrationMacro::columns($this);
         });
 
-        Blueprint::macro('dropSuperNestedSet', function () {
+        Blueprint::macro('dropAdvancedNestedSet', function () {
             MigrationMacro::dropColumns($this);
         });
     }
