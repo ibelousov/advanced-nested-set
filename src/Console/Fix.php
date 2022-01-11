@@ -57,20 +57,18 @@ class Fix extends Command
         $bar = $this->output->createProgressBar(count($this->sql));
         $bar->start();
 
-        DB::beginTransaction();
-
-        foreach($this->sql as $query) {
-            DB::update($query);
-            $bar->advance();
-        }
+        DB::transaction(function() use($bar) {
+            foreach($this->sql as $query) {
+                DB::update($query);
+                $bar->advance();
+            }
+        });
 
         $bar->finish();
 
         $this->newLine(1);
 
         $this->info('Tree rebuild successfully done!');
-
-        DB::commit();
     }
 
     public function buildQueriesFromTree($tree, $lft = 0)
