@@ -24,7 +24,7 @@ Category::whereHas('parents', function($query) {
 
 Use the package manager composer to install it
 
-```php
+```sh
 composer install ibelousov/math-exec
 ```
 
