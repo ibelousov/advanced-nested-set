@@ -89,23 +89,34 @@ ADVANCED_NESTED_LOCK_DELAY=9999999 # Microseconds waiting after blocking(DEFAULT
 
 - To create node:
 
+```php
 $node = Category::create([...]); // Root node
+```
 
 - To create node inside parent::
-
+```php
 Category::create(['parent_id' => $node->id]); // Child of Root node
+```
 
+```php
 - To move node from parent to root
+```
 
+```php
 $category->update(['parent_id' => null]);
+```
 
 - To move node to another parent
 
+```php
 $category->update(['parent_id' => $parentId]);
+```
 
 - To move node **within** one parent
 
+```php
 $category->moveAfter($category2);
+```
 
 ### Relations
 
