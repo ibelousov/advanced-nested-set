@@ -4,7 +4,7 @@
          bootstrap="vendor/autoload.php"
          cacheResultFile=".phpunit.cache/test-results"
          executionOrder="depends,defects"
-         forceCoversAnnotation="true"
+         forceCoversAnnotation="false"
          beStrictAboutCoversAnnotation="true"
          beStrictAboutOutputDuringTests="true"
          beStrictAboutTodoAnnotatedTests="true"
@@ -15,7 +15,7 @@
 
 <testsuites>
     <testsuite name="default">
-        <directory suffix=".php">tests</directory>
+        <directory suffix=".php">tests/Unit</directory>
     </testsuite>
 </testsuites>
 
@@ -31,5 +31,7 @@
     <server name="DB_DATABASE" value="tests"/>
     <server name="DB_PASSWORD" value="tests"/>
     <server name="DB_USERNAME" value="tests"/>
+    <env name="ADVANCED_NESTED_LOCK_WAIT" value="1"/>
+    <env name="ADVANCED_NESTED_LOCK_DELAY" value="1"/>
 </php>
 </phpunit>

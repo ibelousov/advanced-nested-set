@@ -10,7 +10,7 @@
          processIsolation="false"
          stopOnFailure="false">
     <testsuites>
-        <testsuite name="SuperNestedSet tests">
+        <testsuite name="AdvancedNestedSet tests">
             <directory>tests</directory>
         </testsuite>
     </testsuites>
