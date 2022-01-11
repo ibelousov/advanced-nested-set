@@ -1,5 +1,11 @@
 language: php
 
+dist: xenial
+
+services:
+    - postgresql
+    - redis
+
 php:
     - 8.0
     - 8.1
