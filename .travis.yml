@@ -1,0 +1,12 @@
+language: php
+
+php:
+    - 8.0
+    - 8.1
+
+before_script:
+    - travis_retry composer update
+
+script:
+    - vendor/bin/phpunit
+    - vendor/bin/phpunit --configuration=phpunit.pgsql.xml
