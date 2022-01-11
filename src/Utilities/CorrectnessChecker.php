@@ -24,7 +24,7 @@ class CorrectnessChecker
 
     public static function isCorrect($table)
     {
-        return 0 == self::errorsCount($table);
+        return (0 == self::errorsCount($table));
     }
 
     public static function errorsCount($table)
