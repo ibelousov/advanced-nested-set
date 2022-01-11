@@ -4,7 +4,7 @@ namespace Ibelousov\AdvancedNestedSet;
 
 use Illuminate\Database\Schema\Blueprint;
 
-class MigrationMacro 
+class MigrationMacro
 {
     const LFT = 'lft';
     const RGT = 'rgt';
@@ -22,16 +22,15 @@ class MigrationMacro
 
         $table->softDeletes();
 
-        $table->index([self::LFT,self::RGT,self::PARENT_ID,self::DEPTH]);
+        $table->index([self::LFT, self::RGT, self::PARENT_ID, self::DEPTH]);
     }
 
     public static function dropColumns(Blueprint $table)
     {
-        $table->dropIndex([self::LFT,self::RGT,self::PARENT_ID,self::DEPTH]);
-        $table->dropColumn([self::LFT,self::RGT,self::PARENT_ID,self::DEPTH]);
-        $table->dropForeign($table->getTable() . '_' . self::PARENT_ID . '_foreign');
+        $table->dropIndex([self::LFT, self::RGT, self::PARENT_ID, self::DEPTH]);
+        $table->dropColumn([self::LFT, self::RGT, self::PARENT_ID, self::DEPTH]);
+        $table->dropForeign($table->getTable().'_'.self::PARENT_ID.'_foreign');
 
         $table->dropSoftDeletes();
     }
-    
 }

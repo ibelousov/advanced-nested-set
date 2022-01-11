@@ -26,7 +26,7 @@ class CreateCategoriesTable extends Migration
 
             $table->softDeletes();
 
-            $table->index([MigrationMacro::LFT,MigrationMacro::RGT,MigrationMacro::PARENT_ID,MigrationMacro::DEPTH]);
+            $table->index([MigrationMacro::LFT, MigrationMacro::RGT, MigrationMacro::PARENT_ID, MigrationMacro::DEPTH]);
             $table->timestamps();
         });
     }

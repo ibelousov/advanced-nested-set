@@ -1,12 +1,9 @@
 <?php
 
-
 namespace Ibelousov\AdvancedNestedSet\Tests\Unit;
 
-
-use Ibelousov\AdvancedNestedSet\Tests\Misc\TestCase;
 use Ibelousov\AdvancedNestedSet\Tests\Misc\Models\Category;
-use Ibelousov\AdvancedNestedSet\Utilities\CorrectnessChecker;
+use Ibelousov\AdvancedNestedSet\Tests\Misc\TestCase;
 
 class DeleteTest extends TestCase
 {

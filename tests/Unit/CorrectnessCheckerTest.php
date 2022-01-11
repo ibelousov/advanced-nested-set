@@ -4,10 +4,7 @@ namespace Ibelousov\AdvancedNestedSet\Tests\Unit;
 
 use Ibelousov\AdvancedNestedSet\Tests\Misc\Models\Test;
 use Ibelousov\AdvancedNestedSet\Tests\Misc\TestCase;
-use Ibelousov\AdvancedNestedSet\Tests\Misc\Models\Category;
-use Ibelousov\AdvancedNestedSet\Tests\Misc\Models\Product;
 use Ibelousov\AdvancedNestedSet\Utilities\CorrectnessChecker;
-use Illuminate\Support\Facades\DB;
 
 class CorrectnessCheckerTest extends TestCase
 {

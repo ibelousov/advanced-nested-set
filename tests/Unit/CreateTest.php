@@ -1,14 +1,9 @@
 <?php
 
-
 namespace Ibelousov\AdvancedNestedSet\Tests\Unit;
 
-use Ibelousov\AdvancedNestedSet\Tests\Misc\TestCase;
-use Ibelousov\AdvancedNestedSet\Utilities\CorrectnessChecker;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
 use Ibelousov\AdvancedNestedSet\Tests\Misc\Models\Category;
-use phpDocumentor\Reflection\Types\Void_;
+use Ibelousov\AdvancedNestedSet\Tests\Misc\TestCase;
 
 class CreateTest extends TestCase
 {
@@ -53,5 +48,4 @@ class CreateTest extends TestCase
         $this->assertEquals(7, $test4->fresh()->lft);
         $this->assertEquals(8, $test4->fresh()->rgt);
     }
-
 }
