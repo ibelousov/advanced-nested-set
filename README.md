@@ -181,3 +181,7 @@ You can add this command to schedule to hold nested set in correct state
 To check nested set in table you can use:
 
 php artisan advanced-nested-set:check tablename --verbose
+
+### Important
+
+As this package use Cache, to correct handle it between processes for atomic lock it's suggested to use redis/memcached or other inmemory databases for speed and correctnes
