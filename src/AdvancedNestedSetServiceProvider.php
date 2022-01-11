@@ -2,23 +2,21 @@
 
 namespace Ibelousov\AdvancedNestedSet;
 
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\ServiceProvider;
-use Ibelousov\AdvancedNestedSet\Console\Fix;
 use Ibelousov\AdvancedNestedSet\Console\Check;
+use Ibelousov\AdvancedNestedSet\Console\Fix;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\ServiceProvider;
 
 class AdvancedNestedSetServiceProvider extends ServiceProvider
 {
     public function boot()
     {
-        if($this->app->runningInConsole()) 
+        if ($this->app->runningInConsole()) {
             $this->commands(
                 Fix::class,
                 Check::class
             );
-
+        }
     }
 
     public function register()

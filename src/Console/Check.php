@@ -4,7 +4,6 @@ namespace Ibelousov\AdvancedNestedSet\Console;
 
 use Ibelousov\AdvancedNestedSet\Utilities\CorrectnessChecker;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
 
 class Check extends Command
 {
@@ -46,21 +45,20 @@ class Check extends Command
         try {
             $errors = CorrectnessChecker::getErrors($this->argument('table'));
 
-            if(count($errors))
+            if (count($errors)) {
                 $this->error(sprintf('Tree is broken, errors count: %s', count($errors)));
-            else
+            } else {
                 $this->info('Tree is ok');
+            }
 
-            if($this->option('verbose'))
-                foreach($errors as $error)
+            if ($this->option('verbose')) {
+                foreach ($errors as $error) {
                     $this->error($error);
-
-        } catch(\Exception $exception) {
-
-            return $this->error("Table \"" . $this->argument('table') . "\" doesn't exists, or it's not a NestedSet");
-
+                }
+            }
+        } catch (\Exception $exception) {
+            return $this->error('Table "'.$this->argument('table')."\" doesn't exists, or it's not a NestedSet");
         }
-
 
         return 0;
     }

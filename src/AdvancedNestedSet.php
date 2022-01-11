@@ -2,7 +2,6 @@
 
 namespace Ibelousov\AdvancedNestedSet;
 
-use Closure;
 use Ibelousov\AdvancedNestedSet\Exceptions\UnsupportedDatabaseException;
 use Ibelousov\AdvancedNestedSet\Relations\Descendants;
 use Ibelousov\AdvancedNestedSet\Relations\DescendantsAndSelf;
@@ -27,27 +26,25 @@ trait AdvancedNestedSet
     public static $ADVANCED_NESTED_LOCK_DELAY = 100000;
 
     // supported databases
-    public static $SUPPORTED_DRIVERS = ['sqlite','pgsql'];
+    public static $SUPPORTED_DRIVERS = ['sqlite', 'pgsql'];
 
     public static function bootAdvancedNestedSet()
     {
-        if(!in_array((new static)->getConnection()->getName(), self::$SUPPORTED_DRIVERS))
+        if (! in_array((new static)->getConnection()->getName(), self::$SUPPORTED_DRIVERS)) {
             throw new UnsupportedDatabaseException((new static)->getConnection()->getName());
+        }
 
-        static::created(function($item) {
-            self::lock(function() use ($item) {
+        static::created(function ($item) {
+            self::lock(function () use ($item) {
                 DB::transaction(function () use ($item) {
                     $parent = static::withoutGlobalScopes()->firstWhere('id', $item->parent_id);
 
-                    if (!$parent) {
-
+                    if (! $parent) {
                         $item->lft = static::withoutGlobalScopes()->max('rgt') + 1;
                         $item->rgt = static::withoutGlobalScopes()->max('rgt') + 2;
                         $item->depth = 1;
                         $item->parent_id = null;
-
                     } else {
-
                         $parent->parents()->withoutGlobalScopes()->update(['rgt' => DB::raw('rgt + 2')]);
                         $parent->rgt = DB::raw('rgt + 2');
                         $parent->saveQuietly();
@@ -65,13 +62,14 @@ trait AdvancedNestedSet
         });
 
         static::updated(function ($item) {
-            self::lock(function() use ($item) {
-                if (($item->parent_id != $item->getOriginal('parent_id')) && !$item->descendants_and_self()->withoutGlobalScopes()->firstWhere('id', $item->parent_id)) {
+            self::lock(function () use ($item) {
+                if (($item->parent_id != $item->getOriginal('parent_id')) && ! $item->descendants_and_self()->withoutGlobalScopes()->firstWhere('id', $item->parent_id)) {
                     DB::transaction(function () use ($item) {
                         $childrenAndSelf = $item->descendants_and_self;
 
-                        if ($childrenAndSelf->firstWhere('id', $item->parent_id))
+                        if ($childrenAndSelf->firstWhere('id', $item->parent_id)) {
                             return;
+                        }
 
                         $ids = $childrenAndSelf->pluck('id')->toArray();
                         $newParent = optional(self::withoutGlobalScopes()->where('id', $item->parent_id)->first());
@@ -91,25 +89,24 @@ trait AdvancedNestedSet
 
                         $item->parents()->withoutGlobalScopes()->update(['rgt' => $rgtMinus]);
                         static::withoutGlobalScopes()->where('lft', '>', $item->rgt)->update(['lft' => $lftMinus, 'rgt' => $rgtMinus]);
-                        static::withoutGlobalScopes()->where('lft', '>', (int)optional(static::find($newParent->id))->lft)->whereNotIn('id', $ids)->update(['lft' => $lftPlus, 'rgt' => $rgtPlus]);
+                        static::withoutGlobalScopes()->where('lft', '>', (int) optional(static::find($newParent->id))->lft)->whereNotIn('id', $ids)->update(['lft' => $lftPlus, 'rgt' => $rgtPlus]);
                         static::withoutGlobalScopes()->whereIn('id', array_filter(array_merge($newParentParentsIds, [$newParent->id])))->update(['rgt' => $rgtPlus]);
 
-                        $newParentLft = optional(self::find((int)optional($newParent)->id))->lft;
+                        $newParentLft = optional(self::find((int) optional($newParent)->id))->lft;
                         $sign = $item->lft > $newParentLft ? '-' : '+';
-                        $difference = abs(optional(static::find((int)$newParent->id))->lft + 1 - $item->lft);
+                        $difference = abs(optional(static::find((int) $newParent->id))->lft + 1 - $item->lft);
                         $lftMove = DB::raw(sprintf('lft %s %s', $sign, $difference));
                         $rgtMove = DB::raw(sprintf('rgt %s %s', $sign, $difference));
                         static::withoutGlobalScopes()->whereIn('id', $ids)->update(['lft' => $lftMove, 'rgt' => $rgtMove, 'depth' => $depthShift]);
                     });
-
-                } else if ($item->isDirty('parent_id')) {
+                } elseif ($item->isDirty('parent_id')) {
                     $item->parent_id = $item->getRawOriginal('parent_id');
                 }
             });
         });
 
-        static::deleted(function($item) {
-            self::lock(function() use ($item) {
+        static::deleted(function ($item) {
+            self::lock(function () use ($item) {
                 $item->fresh()->descendants()->withoutGlobalScopes()->delete();
             });
         });
@@ -117,12 +114,13 @@ trait AdvancedNestedSet
 
     public function moveAfter(self $afterEl)
     {
-        self::lock(function() use($afterEl) {
-            if ($afterEl->parent_id != $this->parent_id || $this->id == $afterEl->id)
+        self::lock(function () use ($afterEl) {
+            if ($afterEl->parent_id != $this->parent_id || $this->id == $afterEl->id) {
                 return;
+            }
 
-            $shift = (string)((int)($this->lft < $afterEl->lft ? abs($this->lft - $afterEl->rgt) - ($this->rgt - $this->lft) : abs($afterEl->rgt - $this->lft) - 1));
-            $shiftAfter = (string)((int)($this->rgt - $this->lft + 1));
+            $shift = (string) ((int) ($this->lft < $afterEl->lft ? abs($this->lft - $afterEl->rgt) - ($this->rgt - $this->lft) : abs($afterEl->rgt - $this->lft) - 1));
+            $shiftAfter = (string) ((int) ($this->rgt - $this->lft + 1));
 
             $sql = sprintf('UPDATE %s SET (lft,rgt) = (
                     SELECT
@@ -152,28 +150,30 @@ trait AdvancedNestedSet
     public static function print()
     {
         printf("\n----------------------------------------------------------------------\n");
-        printf("%-25s %10s %10s %10s %10s\n", 'EL','LEFT','RIGHT','PAREN','DEPTH');
+        printf("%-25s %10s %10s %10s %10s\n", 'EL', 'LEFT', 'RIGHT', 'PAREN', 'DEPTH');
         self::all()->sortBy('lft')->each(
-            fn($el) => printf("%-25s %10s %10s %10s %10s\n", sprintf("%s ID:%2s %10s", str_repeat("-", $el->depth), $el->id,$el->name),$el->lft,$el->rgt,$el->parent_id,$el->depth)
+            fn ($el) => printf("%-25s %10s %10s %10s %10s\n", sprintf('%s ID:%2s %10s', str_repeat('-', $el->depth), $el->id, $el->name), $el->lft, $el->rgt, $el->parent_id, $el->depth)
         );
         printf("----------------------------------------------------------------------\n");
     }
 
     public static function lock($call)
     {
-        $lockName = env('ADVANCED_NESTED_LOCK_NAME', AdvancedNestedSet::$ADVANCED_NESTED_SET_LOCK_NAME) . static::class;
+        $lockName = env('ADVANCED_NESTED_LOCK_NAME', AdvancedNestedSet::$ADVANCED_NESTED_SET_LOCK_NAME).static::class;
         $blockWait = env('ADVANCED_NESTED_LOCK_WAIT', AdvancedNestedSet::$ADVANCED_NESTED_LOCK_WAIT);
         $blockDelay = env('ADVANCED_NESTED_LOCK_DELAY', self::$ADVANCED_NESTED_LOCK_DELAY);
 
-        if($blockWait)
-            Cache::lock($lockName)->block($blockWait, function() use($call) {
+        if ($blockWait) {
+            Cache::lock($lockName)->block($blockWait, function () use ($call) {
                 $call();
             });
-        else
+        } else {
             $call();
+        }
 
-        if($blockDelay)
+        if ($blockDelay) {
             usleep($blockDelay);
+        }
     }
 
     public function newCollection(array $models = [])
@@ -182,7 +182,8 @@ trait AdvancedNestedSet
     }
 
     /**
-     * return true if nested set is correct
+     * return true if nested set is correct.
+     *
      * @return bool
      */
     public static function isCorrect()
@@ -191,7 +192,8 @@ trait AdvancedNestedSet
     }
 
     /**
-     * return errors if nested set is not correct
+     * return errors if nested set is not correct.
+     *
      * @return array
      */
     public static function errors()

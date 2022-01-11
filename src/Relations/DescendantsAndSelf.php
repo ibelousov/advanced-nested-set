@@ -18,18 +18,19 @@ class DescendantsAndSelf extends Relation
 
     public function addConstraints()
     {
-        if($this->parent->lft && $this->parent->rgt)
-            $this->query->where(function($query) {
-                $query->where('lft', '>=', (int)$this->parent->lft)->where('rgt', '<=', (int)$this->parent->rgt);
+        if ($this->parent->lft && $this->parent->rgt) {
+            $this->query->where(function ($query) {
+                $query->where('lft', '>=', (int) $this->parent->lft)->where('rgt', '<=', (int) $this->parent->rgt);
             });
+        }
     }
 
     public function addEagerConstraints(array $items)
     {
-        $this->query->where(function($query) use($items) {
-            foreach($items as $key => $item) {
+        $this->query->where(function ($query) use ($items) {
+            foreach ($items as $key => $item) {
                 $query->{$key == 0 ? 'where' : 'orWhere'}(function ($query) use ($item) {
-                    $query->where('lft', '>=', (int)$item->lft)->where('rgt', '<=', (int)$item->rgt);
+                    $query->where('lft', '>=', (int) $item->lft)->where('rgt', '<=', (int) $item->rgt);
                 });
             }
         });
@@ -39,8 +40,9 @@ class DescendantsAndSelf extends Relation
     {
         $class = (get_class($this->parent));
 
-        foreach ($items as $item)
+        foreach ($items as $item) {
             $item->setRelation($relation, new $class);
+        }
 
         return $items;
     }
@@ -49,7 +51,7 @@ class DescendantsAndSelf extends Relation
     {
         $tableName = $this->parent->getTable();
 
-        $query->from($query->getModel()->getTable() . ' as ' . $hash = $this->getRelationCountHash());
+        $query->from($query->getModel()->getTable().' as '.$hash = $this->getRelationCountHash());
 
         $query->getModel()->setTable($hash);
 

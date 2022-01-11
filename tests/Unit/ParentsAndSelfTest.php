@@ -1,12 +1,10 @@
 <?php
 
-
 namespace Ibelousov\AdvancedNestedSet\Tests\Unit;
 
-
-use Ibelousov\AdvancedNestedSet\Tests\Misc\TestCase;
 use Ibelousov\AdvancedNestedSet\Tests\Misc\Models\Category;
 use Ibelousov\AdvancedNestedSet\Tests\Misc\Models\Product;
+use Ibelousov\AdvancedNestedSet\Tests\Misc\TestCase;
 
 class ParentsAndSelfTest extends TestCase
 {
@@ -17,7 +15,7 @@ class ParentsAndSelfTest extends TestCase
         $c2 = Category::create(['parent_id' => $c1->id]);
         $c3 = Category::create(['parent_id' => $c2->id]);
 
-        $this->assertEquals([$c1->id,$c2->id,$c3->id], $c3->fresh()->parents_and_self->pluck('id')->toArray());
+        $this->assertEquals([$c1->id, $c2->id, $c3->id], $c3->fresh()->parents_and_self->pluck('id')->toArray());
     }
 
     /** @test */
@@ -26,8 +24,8 @@ class ParentsAndSelfTest extends TestCase
         $t1 = Category::create(['name' => 'parent']);
         $t2 = Category::create(['name' => 'child', 'parent_id' => $t1->id]);
 
-        $results1 = Category::whereHas('parents_and_self', fn($q) => $q->where('name', '=', 'parent'))->get();
-        $results2 = Category::whereHas('parents_and_self', fn($q) => $q->where('name', '=', 'child'))->get();
+        $results1 = Category::whereHas('parents_and_self', fn ($q) => $q->where('name', '=', 'parent'))->get();
+        $results2 = Category::whereHas('parents_and_self', fn ($q) => $q->where('name', '=', 'child'))->get();
 
         $this->assertEquals(2, $results1->count());
         $this->assertEquals($t1->name, $results1->first()->name);
@@ -46,8 +44,8 @@ class ParentsAndSelfTest extends TestCase
         $product1 = $subSubCategory->products()->create(['name' => 'product']);
         $product2 = $subCategory->products()->create(['name' => 'product2']);
 
-        $results1 = Product::where('name', '=', 'product')->whereHas('category.parents_and_self', fn($q) => $q->where('name', '=', 'category'))->get();
-        $results2 = Product::whereHas('category.parents_and_self.products', fn($q) => $q->where('name', '=', 'product2'))->get();
+        $results1 = Product::where('name', '=', 'product')->whereHas('category.parents_and_self', fn ($q) => $q->where('name', '=', 'category'))->get();
+        $results2 = Product::whereHas('category.parents_and_self.products', fn ($q) => $q->where('name', '=', 'product2'))->get();
 
         $this->assertEquals(1, $results1->count());
         $this->assertEquals($product1->name, $results1->first()->name);
@@ -60,8 +58,9 @@ class ParentsAndSelfTest extends TestCase
     {
         $parentId = null;
         $categories = [];
-        foreach (range(0, 10) as $i)
+        foreach (range(0, 10) as $i) {
             $parentId = ($categories[] = Category::create(['parent_id' => $parentId]))->id;
+        }
 
         $categories[array_key_last($categories) - 1]->products()->create();
 

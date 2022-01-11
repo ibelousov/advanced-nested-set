@@ -9,7 +9,7 @@ class Category extends Model
 {
     use AdvancedNestedSet;
 
-    protected $fillable = ['name','lft','rgt','depth','parent_id']; 
+    protected $fillable = ['name', 'lft', 'rgt', 'depth', 'parent_id'];
 
     public $timestamps = false;
 
