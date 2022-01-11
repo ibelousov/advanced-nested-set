@@ -2,7 +2,7 @@
 
 namespace Ibelousov\AdvancedNestedSet\Tests\Misc\Models;
 
-use Ibelousov\AdvancedNestedSet\Relations\AdvancedNestedSet;
+use Ibelousov\AdvancedNestedSet\AdvancedNestedSet;
 use Illuminate\Database\Eloquent\Model;
 
 class Category extends Model

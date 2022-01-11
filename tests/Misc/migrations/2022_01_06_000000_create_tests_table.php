@@ -22,11 +22,10 @@ class CreateTestsTable extends Migration
             $table->unsignedBigInteger(MigrationMacro::PARENT_ID)->nullable();
             $table->unsignedBigInteger(MigrationMacro::DEPTH)->nullable();
 
-            $table->foreign(MigrationMacro::PARENT_ID)->references('id')->on($table->getTable());
+            $table->foreign(MigrationMacro::PARENT_ID)->references('id')->on('tests');
 
             $table->softDeletes();
 
-            $table->index([MigrationMacro::LFT,MigrationMacro::RGT,MigrationMacro::PARENT_ID,MigrationMacro::DEPTH]);
             $table->timestamps();
         });
     }

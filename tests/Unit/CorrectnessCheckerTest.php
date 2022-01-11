@@ -9,7 +9,7 @@ use Ibelousov\AdvancedNestedSet\Tests\Misc\Models\Product;
 use Ibelousov\AdvancedNestedSet\Utilities\CorrectnessChecker;
 use Illuminate\Support\Facades\DB;
 
-class UtilityTest extends TestCase
+class CorrectnessCheckerTest extends TestCase
 {
     /** @test */
     public function is_correctly_verified_correct_nested_set()
@@ -23,12 +23,9 @@ class UtilityTest extends TestCase
     }
 
     /** @test */
-    public function is_correctly_verified_uncorrect_nested_set()
+    public function is_correctly_verified_empty_nested_set()
     {
-        DB::update("INSERT INTO tests(depth) VALUES(1)");
-
-        $this->assertTrue(!CorrectnessChecker::isCorrect('tests'));
-
-        DB::delete('DELETE FROM tests WHERE id IS NOT NULL');
+        $this->assertEquals(0, Test::count());
+        $this->assertTrue(CorrectnessChecker::isCorrect('tests'));
     }
 }

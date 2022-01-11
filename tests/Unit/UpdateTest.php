@@ -159,7 +159,7 @@ class UpdateTest extends TestCase
 
         $test2->update(['parent_id' => $test1->id]);
 
-        $this->assertEquals(true, Category::isCorrect());
+        $this->assertTrue(Category::isCorrect());
         $this->assertEquals(1, $test1->fresh()->lft);
         $this->assertEquals(4, $test1->fresh()->rgt);
         $this->assertEquals(2, $test2->fresh()->lft);
