@@ -1,0 +1,71 @@
+# For more information: https://laravel.com/docs/sail
+version: '3'
+services:
+  phpunit:
+    container_name: phpunit
+    restart: always
+    image: phpunit/phpunit
+    command: php artisan queue:work
+    working_dir: /var/www
+    volumes:
+      - ./:/var/www
+    networks:
+      - app-network
+  super-nested-set-pgsql:
+    image: 'postgres:13'
+    ports:
+      - '5432:5432'
+    environment:
+      PGPASSWORD: 'tests'
+      POSTGRES_DB: 'tests'
+      POSTGRES_USER: 'tests'
+      POSTGRES_PASSWORD: 'tests'
+    volumes:
+      - 'super-nested-set-pgsql:/var/lib/postgresql/data'
+    networks:
+      - super-nested-set
+    healthcheck:
+      test: ["CMD", "pg_isready", "-q", "-d", "${DB_DATABASE}", "-U", "${DB_USERNAME}"]
+      retries: 3
+      timeout: 5s
+  super-nested-set-mysql:
+    image: 'mysql/mysql-server:5.7'
+    ports:
+      - '3306:3306'
+    environment:
+      MYSQL_ROOT_PASSWORD: 'tests'
+      MYSQL_ROOT_HOST: "%"
+      MYSQL_DATABASE: 'tests'
+      MYSQL_USER: 'tests'
+      MYSQL_PASSWORD: 'tests'
+    volumes:
+      - 'super-nested-set-mysql:/var/lib/mysql'
+    networks:
+      - super-nested-set
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-ptests"]
+      retries: 3
+      timeout: 5s
+  super-nested-set-sqlsrv:
+    image: mcr.microsoft.com/mssql/server:2017-latest
+    environment:
+      - SA_PASSWORD=P@ssword
+      - ACCEPT_EULA=Y
+      - SA_DATABASE=tests
+      - SA_USER=SA
+    volumes:
+      - 'super-nested-set-sqlsrv:/var/opt/mssql'
+    ports:
+      - "1433:1433"
+    networks:
+      - super-nested-set
+networks:
+  super-nested-set:
+    driver: bridge
+volumes:
+  super-nested-set-pgsql:
+    driver: local
+  super-nested-set-mysql:
+    driver: local
+  super-nested-set-sqlsrv:
+    driver: local
