@@ -29,8 +29,7 @@
 <php>
     <server name="DB_CONNECTION" value="pgsql"/>
     <server name="DB_DATABASE" value="tests"/>
-    <server name="DB_PASSWORD" value="tests"/>
-    <server name="DB_USERNAME" value="tests"/>
+    <server name="DB_USERNAME" value="postgres"/>
     <env name="ADVANCED_NESTED_LOCK_WAIT" value="1"/>
     <env name="ADVANCED_NESTED_LOCK_DELAY" value="1"/>
 </php>

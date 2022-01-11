@@ -11,6 +11,7 @@ php:
 
 before_script:
     - travis_retry composer update
+    - psql -c 'create database tests;' -U postgres
 
 script:
     - vendor/bin/phpunit --configuration=phpunit.pgsql.xml
