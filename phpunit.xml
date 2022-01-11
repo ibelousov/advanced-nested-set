@@ -2,11 +2,10 @@
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.5/phpunit.xsd"
          bootstrap="vendor/autoload.php"
-         cacheResultFile=".phpunit.cache/test-results"
          forceCoversAnnotation="false"
-         beStrictAboutCoversAnnotation="true"
-         beStrictAboutOutputDuringTests="true"
-         beStrictAboutTodoAnnotatedTests="true"
+         beStrictAboutCoversAnnotation="false"
+         beStrictAboutOutputDuringTests="false"
+         beStrictAboutTodoAnnotatedTests="false"
          convertDeprecationsToExceptions="true"
          failOnRisky="false"
          failOnWarning="false"
@@ -18,11 +17,13 @@
         </testsuite>
     </testsuites>
 
-    <coverage cacheDirectory=".phpunit.cache/code-coverage"
-              processUncoveredFiles="true">
+    <coverage>
         <include>
             <directory suffix=".php">src</directory>
         </include>
+        <report>
+            <text outputFile="build/coverage.txt" showUncoveredFiles="false" showOnlySummary="true"/>
+        </report>
     </coverage>
 
     <php>
@@ -31,4 +32,5 @@
         <env name="ADVANCED_NESTED_LOCK_WAIT" value="1"/>
         <env name="ADVANCED_NESTED_LOCK_DELAY" value="1"/>
     </php>
+
 </phpunit>
