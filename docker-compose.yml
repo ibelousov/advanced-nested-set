@@ -1,16 +1,6 @@
 # For more information: https://laravel.com/docs/sail
 version: '3'
 services:
-  phpunit:
-    container_name: phpunit
-    restart: always
-    image: phpunit/phpunit
-    command: php artisan queue:work
-    working_dir: /var/www
-    volumes:
-      - ./:/var/www
-    networks:
-      - app-network
   super-nested-set-pgsql:
     image: 'postgres:13'
     ports:
