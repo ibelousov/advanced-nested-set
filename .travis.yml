@@ -8,7 +8,6 @@ services:
 
 php:
     - 8.0
-    - 8.1
 
 before_script:
     - travis_retry composer update
