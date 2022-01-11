@@ -2,6 +2,8 @@
 
 namespace Ibelousov\AdvancedNestedSet;
 
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\ServiceProvider;
 use Ibelousov\AdvancedNestedSet\Console\Fix;
 use Ibelousov\AdvancedNestedSet\Console\Check;
@@ -16,6 +18,7 @@ class AdvancedNestedSetServiceProvider extends ServiceProvider
                 Fix::class,
                 Check::class
             );
+
     }
 
     public function register()
