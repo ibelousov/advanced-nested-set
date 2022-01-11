@@ -2,11 +2,11 @@
 
 ## Attention
 
-**FOR NOW POSTGRESQL IS ONLY SUPPORTED DATABASE**
+**FOR NOW POSTGRESQL IS THE ONLY SUPPORTED DATABASE**
 
 ## Overview
 
-Super nested set is laravel package, that can be used for handling nested tree sets like this:
+Advanced nested set is laravel package, that can be used for handling nested tree sets like this:
 
 ```php
 Category::first()->descendants; // print all nested categories of category
@@ -25,14 +25,13 @@ Category::whereHas('parents', function($query) {
 Use the package manager composer to install it
 
 ```sh
-composer install ibelousov/math-exec
+composer require ibelousov/advanced-nested-set
 ```
 
 ## Usage
 
 ### Setup
-
-So, you have Category model and wants to add to it nested set. For that purpose you can:
+So, you have Category model and want to add a nested set to it. For that purpose you can:
 
 #### 1) Create and execute migration
 
@@ -60,7 +59,7 @@ So, you have Category model and wants to add to it nested set. For that purpose 
 #### 2) add AdvancedNestedSet to model:
 
 ```php
-use \Ibelousov\AdvancedNestedSet\Relations\AdvancedNestedSet;
+use \Ibelousov\AdvancedNestedSet\AdvancedNestedSet;
 
 class Category extends Model
 {
@@ -164,6 +163,14 @@ Category::isCorrect();
 Category::errors();
 ```
 
+```php
+// Convert to treeStructure
+Category::get()->toTree();
+
+// Convert to tree and than to array
+Category::get()->toTree()->toArray();
+```
+
 ### Console commands
 
 #### Fix table
@@ -182,4 +189,4 @@ php artisan advanced-nested-set:check tablename --verbose
 
 ### Important
 
-As this package use Cache, to correct handle it between processes for atomic lock it's suggested to use redis/memcached or other inmemory databases for speed and correctnes
+As this package uses Cache, for correct handling between atomic lock processes  it's suggested to use redis/memcached or other inmemory databases for speed and accuracy 
