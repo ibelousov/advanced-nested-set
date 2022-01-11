@@ -1,13 +1,14 @@
 <?php
 
-namespace Ibelousov\AdvancedNestedSet\Relations;
+namespace Ibelousov\AdvancedNestedSet;
 
 use Closure;
 use Ibelousov\AdvancedNestedSet\Exceptions\UnsupportedDatabaseException;
-use Ibelousov\AdvancedNestedSet\Tests\Models\Test;
+use Ibelousov\AdvancedNestedSet\Relations\Descendants;
+use Ibelousov\AdvancedNestedSet\Relations\DescendantsAndSelf;
+use Ibelousov\AdvancedNestedSet\Relations\Parents;
+use Ibelousov\AdvancedNestedSet\Relations\ParentsAndSelf;
 use Ibelousov\AdvancedNestedSet\Utilities\CorrectnessChecker;
-use Illuminate\Contracts\Cache\LockTimeoutException;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -17,7 +18,7 @@ trait AdvancedNestedSet
     use SoftDeletes;
 
     // lock prefix
-    public static $ADVANCED_NESTED_SET_LOCK_NAME = 'SUPER_NESTED_SET_LOCK_';
+    public static $ADVANCED_NESTED_SET_LOCK_NAME = 'ADVANCED_NESTED_SET_LOCK_';
 
     // seconds to wait before throw exception
     public static $ADVANCED_NESTED_LOCK_WAIT = 30;
@@ -160,56 +161,96 @@ trait AdvancedNestedSet
 
     public static function lock($call)
     {
-        $lockName = env('ADVANCED_NESTED_LOCK_NAME', AdvancedNestedSet::$ADVANCED_NESTED_SET_LOCK_NAME) . self::class;
-        $blockName = env('ADVANCED_NESTED_LOCK_WAIT', AdvancedNestedSet::$ADVANCED_NESTED_LOCK_WAIT);
+        $lockName = env('ADVANCED_NESTED_LOCK_NAME', AdvancedNestedSet::$ADVANCED_NESTED_SET_LOCK_NAME) . static::class;
+        $blockWait = env('ADVANCED_NESTED_LOCK_WAIT', AdvancedNestedSet::$ADVANCED_NESTED_LOCK_WAIT);
+        $blockDelay = env('ADVANCED_NESTED_LOCK_DELAY', self::$ADVANCED_NESTED_LOCK_DELAY);
 
-        Cache::lock($lockName)->block($blockName, function() use($call) {
+        if($blockWait)
+            Cache::lock($lockName)->block($blockWait, function() use($call) {
+                $call();
+            });
+        else
             $call();
-        });
 
-        usleep(env('ADVANCED_NESTED_LOCK_DELAY', self::$ADVANCED_NESTED_LOCK_DELAY));
+        if($blockDelay)
+            usleep($blockDelay);
     }
 
+    public function newCollection(array $models = [])
+    {
+        return new TreeCollection($models);
+    }
+
+    /**
+     * return true if nested set is correct
+     * @return bool
+     */
     public static function isCorrect()
     {
         return CorrectnessChecker::isCorrect((new static)->getTable());
     }
 
+    /**
+     * return errors if nested set is not correct
+     * @return array
+     */
     public static function errors()
     {
         return CorrectnessChecker::errors((new static)->getTable());
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | RELATIONS
-    |--------------------------------------------------------------------------
-    */
+    /**
+     * @param $table
+     * @return int
+     */
+    public static function errorsCount()
+    {
+        return CorrectnessChecker::errorsCount((new static)->getTable());
+    }
+
+    /**
+     * @return Descendants
+     */
     public function descendants()
     {
         return (new Descendants($this))->orderBy('lft');
     }
 
+    /**
+     * @return DescendantsAndSelf
+     */
     public function descendants_and_self()
     {
         return (new DescendantsAndSelf($this))->orderBy('lft');
     }
 
+    /**
+     * @return Parents
+     */
     public function parents()
     {
         return (new Parents($this))->orderBy('lft');
     }
 
+    /**
+     * @return ParentsAndSelf
+     */
     public function parents_and_self()
     {
         return (new ParentsAndSelf($this))->orderBy('lft');
     }
 
+    /**
+     * @return mixed
+     */
     public function children()
     {
         return $this->hasMany(static::class, 'parent_id');
     }
 
+    /**
+     * @return mixed
+     */
     public function parent()
     {
         return $this->belongsTo(static::class, 'parent_id', 'id');
