@@ -15,3 +15,4 @@ before_script:
 
 script:
     - vendor/bin/phpunit --configuration=phpunit.pgsql.xml
+    - vendor/bin/phpunit

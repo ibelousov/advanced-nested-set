@@ -2,7 +2,6 @@
 
 namespace Ibelousov\AdvancedNestedSet;
 
-use Closure;
 use Ibelousov\AdvancedNestedSet\Exceptions\UnsupportedDatabaseException;
 use Ibelousov\AdvancedNestedSet\Relations\Descendants;
 use Ibelousov\AdvancedNestedSet\Relations\DescendantsAndSelf;
@@ -121,28 +120,39 @@ trait AdvancedNestedSet
             if ($afterEl->parent_id != $this->parent_id || $this->id == $afterEl->id)
                 return;
 
+            $table = $this->getTable();
             $shift = (string)((int)($this->lft < $afterEl->lft ? abs($this->lft - $afterEl->rgt) - ($this->rgt - $this->lft) : abs($afterEl->rgt - $this->lft) - 1));
-            $shiftAfter = (string)((int)($this->rgt - $this->lft + 1));
+            $shiftSign = ($this->lft > $afterEl->lft ? '-' : '+');
+            $shiftAfter = $this->lft > $afterEl->lft ? 0 : (string)((int)($this->rgt - $this->lft + 1));
+            $shiftOther = (string)((int)($this->rgt - $this->lft + 1));
+            $shiftAfterSign = ($afterEl->lft > $this->lft ? '-' : '+');
+            $minLft = min($this->lft, $afterEl->lft);
+            $maxRgt = max($this->rgt, $afterEl->rgt);
 
-            $sql = sprintf('UPDATE %s SET (lft,rgt) = (
+            $sql = sprintf("UPDATE {$table} SET lft = (
                     SELECT
-                        CASE WHEN lft >= %s AND rgt <= %s THEN lft%s%s WHEN lft >= %s AND rgt <= %s THEN lft%s%s ELSE lft%s%s END,
-                        CASE WHEN lft >= %s AND rgt <= %s THEN rgt%s%s WHEN lft >= %s AND rgt <= %s THEN rgt%s%s ELSE rgt%s%s END
+                        CASE 
+                            WHEN lft >= {$this->lft} AND rgt <= {$this->rgt} 
+                            THEN lft{$shiftSign}{$shift} 
+                            WHEN lft >= {$afterEl->lft} AND rgt <= {$afterEl->rgt} 
+                            THEN lft{$shiftAfterSign}{$shiftAfter} 
+                            ELSE lft{$shiftAfterSign}{$shiftOther} 
+                        END
                     FROM
-                    %s as t
-                    WHERE t.id=%s.id
-                ) WHERE lft >= %s AND rgt <= %s',
-                $this->getTable(),
-                $this->lft, $this->rgt, ($this->lft > $afterEl->lft ? '-' : '+'), $shift,
-                $afterEl->lft, $afterEl->rgt, ($afterEl->lft > $this->lft ? '-' : '+'), $this->lft > $afterEl->lft ? 0 : $shiftAfter,
-                ($afterEl->lft > $this->lft ? '-' : '+'), $afterEl->lft > $this->lft ? $shiftAfter : $shiftAfter,
-                $this->lft, $this->rgt, ($this->lft > $afterEl->lft ? '-' : '+'), $shift,
-                $afterEl->lft, $afterEl->rgt, ($afterEl->lft > $this->lft ? '-' : '+'), $this->lft > $afterEl->lft ? 0 : $shiftAfter,
-                ($afterEl->lft > $this->lft ? '-' : '+'), $afterEl->lft > $this->lft ? $shiftAfter : $shiftAfter,
-                $this->getTable(),
-                $this->getTable(),
-                min($this->lft, $afterEl->lft),
-                max($this->rgt, $afterEl->rgt)
+                    {$table} as t
+                    WHERE t.id={$table}.id
+                ), rgt = ( SELECT 
+                        CASE 
+                            WHEN lft >= {$this->lft} AND rgt <= {$this->rgt} 
+                            THEN rgt{$shiftSign}{$shift} 
+                            WHEN lft >= {$afterEl->lft} AND rgt <= {$afterEl->rgt} 
+                            THEN rgt{$shiftAfterSign}{$shiftAfter} 
+                            ELSE rgt{$shiftAfterSign}{$shiftOther} 
+                        END
+                    FROM
+                    {$table} as t2
+                    WHERE t2.id={$table}.id
+                ) WHERE lft >= {$minLft} AND rgt <= {$maxRgt}"
             );
 
             DB::update($sql);

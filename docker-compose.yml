@@ -1,7 +1,7 @@
 # For more information: https://laravel.com/docs/sail
 version: '3'
 services:
-  super-nested-set-pgsql:
+  advanced-nested-set-pgsql:
     image: 'postgres:13'
     ports:
       - '5432:5432'
@@ -11,14 +11,14 @@ services:
       POSTGRES_USER: 'tests'
       POSTGRES_PASSWORD: 'tests'
     volumes:
-      - 'super-nested-set-pgsql:/var/lib/postgresql/data'
+      - 'advanced-nested-set-pgsql:/var/lib/postgresql/data'
     networks:
-      - super-nested-set
+      - advanced-nested-set
     healthcheck:
       test: ["CMD", "pg_isready", "-q", "-d", "${DB_DATABASE}", "-U", "${DB_USERNAME}"]
       retries: 3
       timeout: 5s
-  super-nested-set-mysql:
+  advanced-nested-set-mysql:
     image: 'mysql/mysql-server:5.7'
     ports:
       - '3306:3306'
@@ -29,14 +29,14 @@ services:
       MYSQL_USER: 'tests'
       MYSQL_PASSWORD: 'tests'
     volumes:
-      - 'super-nested-set-mysql:/var/lib/mysql'
+      - 'advanced-nested-set-mysql:/var/lib/mysql'
     networks:
-      - super-nested-set
+      - advanced-nested-set
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-ptests"]
       retries: 3
       timeout: 5s
-  super-nested-set-sqlsrv:
+  advanced-nested-set-sqlsrv:
     image: mcr.microsoft.com/mssql/server:2017-latest
     environment:
       - SA_PASSWORD=P@ssword
@@ -44,18 +44,18 @@ services:
       - SA_DATABASE=tests
       - SA_USER=SA
     volumes:
-      - 'super-nested-set-sqlsrv:/var/opt/mssql'
+      - 'advanced-nested-set-sqlsrv:/var/opt/mssql'
     ports:
       - "1433:1433"
     networks:
-      - super-nested-set
+      - advanced-nested-set
 networks:
-  super-nested-set:
+  advanced-nested-set:
     driver: bridge
 volumes:
-  super-nested-set-pgsql:
+  advanced-nested-set-pgsql:
     driver: local
-  super-nested-set-mysql:
+  advanced-nested-set-mysql:
     driver: local
-  super-nested-set-sqlsrv:
+  advanced-nested-set-sqlsrv:
     driver: local
