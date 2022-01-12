@@ -2,8 +2,8 @@
 
 namespace Ibelousov\AdvancedNestedSet\Tests\Unit;
 
-use Ibelousov\AdvancedNestedSet\Tests\Misc\TestCase;
 use Ibelousov\AdvancedNestedSet\Tests\Misc\Models\Category;
+use Ibelousov\AdvancedNestedSet\Tests\Misc\TestCase;
 
 class UpdateTest extends TestCase
 {
@@ -147,7 +147,6 @@ class UpdateTest extends TestCase
         $this->assertEquals(6, $test2->fresh()->rgt);
         $this->assertEquals(4, $test3->fresh()->lft);
         $this->assertEquals(5, $test3->fresh()->rgt);
-
     }
 
     /** @test */
@@ -193,13 +192,14 @@ class UpdateTest extends TestCase
         $parentId = null;
         $categories = [];
 
-        foreach(range(0,10) as $i) {
+        foreach (range(0, 10) as $i) {
             $category = Category::create(['parent_id' => $parentId]);
             $categories[] = $category;
             $parentId = $category->id;
         }
 
-        foreach($categories as $key => $category)
+        foreach ($categories as $key => $category) {
             $this->assertEquals($key + 1, Category::withCount('parents_and_self')->get()->skip($key)->first()->parents_and_self_count);
+        }
     }
 }

@@ -13,12 +13,12 @@ class Parents extends Relation
 
     public function __construct($parent)
     {
-        parent::__construct($parent::query()->orderBy('lft','asc'), $parent);
+        parent::__construct($parent::query()->orderBy('lft', 'asc'), $parent);
     }
 
     public function addConstraints()
     {
-        if($this->parent->lft && $this->parent->rgt && $this->parent->depth)
+        if ($this->parent->lft && $this->parent->rgt && $this->parent->depth) {
             $this->query->whereRaw(
                     sprintf(
                     'id in (SELECT id FROM %s WHERE lft in (SELECT MAX(lft) FROM %s WHERE lft < %s AND depth < %s GROUP BY depth) ORDER BY depth desc)',
@@ -28,20 +28,21 @@ class Parents extends Relation
                         $this->parent->depth
                     )
                 );
+        }
     }
 
     public function addEagerConstraints(array $items)
     {
-        $this->query->where(function($query) use($items) {
-            foreach($items as $key => $item) {
+        $this->query->where(function ($query) use ($items) {
+            foreach ($items as $key => $item) {
                 $query->{$key == 0 ? 'where' : 'orWhere'}(function ($query) use ($item) {
                     $query->whereRaw(
                         sprintf(
                             'id IN (SELECT id FROM %s WHERE lft in (SELECT MAX(lft) FROM %s WHERE lft < %s AND depth < %s GROUP BY depth) ORDER BY depth desc)',
                             $this->parent->getTable(),
                             $this->parent->getTable(),
-                            (int)$item->lft,
-                            (int)$item->depth
+                            (int) $item->lft,
+                            (int) $item->depth
                         )
                     );
                 });
@@ -53,8 +54,9 @@ class Parents extends Relation
     {
         $class = (get_class($this->parent));
 
-        foreach ($items as $item)
+        foreach ($items as $item) {
             $item->setRelation($relation, new $class);
+        }
 
         return $items;
     }

@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Ibelousov\AdvancedNestedSet;
-
 
 class TreeCollection extends \Illuminate\Database\Eloquent\Collection
 {
@@ -19,19 +17,21 @@ class TreeCollection extends \Illuminate\Database\Eloquent\Collection
     {
         $tree = new self([], true);
 
-        foreach($this as $item)
-            if($item->parent_id == $root) {
+        foreach ($this as $item) {
+            if ($item->parent_id == $root) {
                 $item->setAttribute('children', $this->toTree($item->id));
                 $tree->push($item);
             }
+        }
 
         return $tree;
     }
 
     public function toArray()
     {
-        if(!$this->isTree)
+        if (! $this->isTree) {
             return $this->toArray();
+        }
 
         return $this->toTreeArray();
     }
@@ -40,7 +40,7 @@ class TreeCollection extends \Illuminate\Database\Eloquent\Collection
     {
         $array = [];
 
-        foreach($this as $item) {
+        foreach ($this as $item) {
             $item = $item->toArray();
             $item['children'] = $item['children']->toArray();
             $array[] = $item;
