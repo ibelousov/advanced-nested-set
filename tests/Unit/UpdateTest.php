@@ -56,7 +56,7 @@ class UpdateTest extends TestCase
     }
 
     /** @test */
-    public function can_move_one_up_after_another_through_third()
+    public function can_move_one_up_after_another_through_third_without_hierarchy()
     {
         $test1 = Category::create();
         $test2 = Category::create();
@@ -84,7 +84,7 @@ class UpdateTest extends TestCase
 
         $test1->moveAfter($test5);
 
-        $this->assertEquals(true, Category::isCorrect());
+        $this->assertTrue(Category::isCorrect());
         $this->assertEquals(1, $test2->fresh()->lft);
         $this->assertEquals(6, $test2->fresh()->rgt);
         $this->assertEquals(2, $test3->fresh()->lft);
@@ -95,6 +95,7 @@ class UpdateTest extends TestCase
         $this->assertEquals(8, $test5->fresh()->rgt);
         $this->assertEquals(9, $test1->fresh()->lft);
         $this->assertEquals(10, $test1->fresh()->rgt);
+
     }
 
     /** @test */
@@ -184,22 +185,5 @@ class UpdateTest extends TestCase
         $this->assertEquals(5, $test1->fresh()->rgt);
         $this->assertEquals(3, $test3->fresh()->lft);
         $this->assertEquals(4, $test3->fresh()->rgt);
-    }
-
-    /** @test */
-    public function is_with_count_works()
-    {
-        $parentId = null;
-        $categories = [];
-
-        foreach (range(0, 10) as $i) {
-            $category = Category::create(['parent_id' => $parentId]);
-            $categories[] = $category;
-            $parentId = $category->id;
-        }
-
-        foreach ($categories as $key => $category) {
-            $this->assertEquals($key + 1, Category::withCount('parents_and_self')->get()->skip($key)->first()->parents_and_self_count);
-        }
     }
 }

@@ -35,6 +35,7 @@ class CorrectnessChecker
     {
         $this->elements = $this->getQuery($table)->keyBy('id');
         $this->elementsGrouped = $this->getQuery($table)->groupBy('parent_id');
+        $this->errorsCount = 0;
 
         $tree = $this->buildCorrectTree();
 

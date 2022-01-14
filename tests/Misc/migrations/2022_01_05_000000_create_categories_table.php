@@ -21,12 +21,13 @@ class CreateCategoriesTable extends Migration
             $table->unsignedBigInteger(MigrationMacro::RGT)->nullable();
             $table->unsignedBigInteger(MigrationMacro::PARENT_ID)->nullable();
             $table->unsignedBigInteger(MigrationMacro::DEPTH)->nullable();
+            $table->unsignedBigInteger(MigrationMacro::DISTANCE)->nullable();
 
             $table->foreign(MigrationMacro::PARENT_ID)->references('id')->on($table->getTable());
 
             $table->softDeletes();
 
-            $table->index([MigrationMacro::LFT, MigrationMacro::RGT, MigrationMacro::PARENT_ID, MigrationMacro::DEPTH]);
+            $table->index([MigrationMacro::LFT, MigrationMacro::RGT, MigrationMacro::PARENT_ID, MigrationMacro::DEPTH, MigrationMacro::DISTANCE]);
             $table->timestamps();
         });
     }

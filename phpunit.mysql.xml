@@ -9,9 +9,9 @@
          beStrictAboutOutputDuringTests="true"
          beStrictAboutTodoAnnotatedTests="true"
          convertDeprecationsToExceptions="true"
-         failOnRisky="true"
-         failOnWarning="true"
-         verbose="true">
+         failOnRisky="false"
+         failOnWarning="false"
+         verbose="false">
 
     <testsuites>
         <testsuite name="default">

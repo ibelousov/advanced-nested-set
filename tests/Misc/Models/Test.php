@@ -9,7 +9,7 @@ class Test extends Model
 {
     use AdvancedNestedSet;
 
-    protected $fillable = ['name', 'lft', 'rgt', 'depth', 'parent_id'];
+    protected $fillable = ['name', 'lft', 'rgt', 'depth', 'parent_id', 'distance'];
 
     public $timestamps = false;
 }

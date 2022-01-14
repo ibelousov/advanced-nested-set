@@ -5,6 +5,7 @@ namespace Ibelousov\AdvancedNestedSet\Relations;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Facades\DB;
 
 class Parents extends Relation
 {
@@ -13,21 +14,25 @@ class Parents extends Relation
 
     public function __construct($parent)
     {
-        parent::__construct($parent::query()->orderBy('lft', 'asc'), $parent);
+        parent::__construct($parent::query()->withoutGlobalScopes(), $parent);
+    }
+
+    protected function parentWhereClause($query, $table, $subTable, $lft, $depth)
+    {
+        return $query->leftJoin(
+            DB::raw("(SELECT MAX(lft) as max_lft FROM $table WHERE lft < $lft AND depth < $depth GROUP BY depth) AS $subTable"),
+            "$subTable.max_lft", "=", "$table.lft"
+        )->whereNotNull("$subTable.max_lft");
     }
 
     public function addConstraints()
     {
         if ($this->parent->lft && $this->parent->rgt && $this->parent->depth) {
-            $this->query->whereRaw(
-                    sprintf(
-                    'id in (SELECT id FROM %s WHERE lft in (SELECT MAX(lft) FROM %s WHERE lft < %s AND depth < %s GROUP BY depth) ORDER BY depth desc)',
-                        $this->parent->getTable(),
-                        $this->parent->getTable(),
-                        $this->parent->lft,
-                        $this->parent->depth
-                    )
-                );
+
+            $this->parentWhereClause(
+                $this->query, $this->parent->getModel()->getTable(), $this->parent->getModel()->getTable() . time(), $this->parent->lft, $this->parent->depth
+            );
+
         }
     }
 
@@ -36,14 +41,8 @@ class Parents extends Relation
         $this->query->where(function ($query) use ($items) {
             foreach ($items as $key => $item) {
                 $query->{$key == 0 ? 'where' : 'orWhere'}(function ($query) use ($item) {
-                    $query->whereRaw(
-                        sprintf(
-                            'id IN (SELECT id FROM %s WHERE lft in (SELECT MAX(lft) FROM %s WHERE lft < %s AND depth < %s GROUP BY depth) ORDER BY depth desc)',
-                            $this->parent->getTable(),
-                            $this->parent->getTable(),
-                            (int) $item->lft,
-                            (int) $item->depth
-                        )
+                    $this->parentWhereClause(
+                        $query, $item->getTable(), $item->getTable() . time(), (int)$item->lft, (int)$item->depth,
                     );
                 });
             }

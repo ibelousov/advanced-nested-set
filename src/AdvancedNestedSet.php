@@ -26,7 +26,7 @@ trait AdvancedNestedSet
     public static $ADVANCED_NESTED_LOCK_DELAY = 100000;
 
     // supported databases
-    public static $SUPPORTED_DRIVERS = ['sqlite', 'pgsql'];
+    public static $SUPPORTED_DRIVERS = ['sqlite', 'pgsql', 'mysql'];
 
     public static function bootAdvancedNestedSet()
     {
@@ -38,6 +38,7 @@ trait AdvancedNestedSet
             self::lock(function () use ($item) {
                 DB::transaction(function () use ($item) {
                     $parent = static::withoutGlobalScopes()->firstWhere('id', $item->parent_id);
+                    $item->distance = 1;
 
                     if (! $parent) {
                         $item->lft = static::withoutGlobalScopes()->max('rgt') + 1;
@@ -45,8 +46,9 @@ trait AdvancedNestedSet
                         $item->depth = 1;
                         $item->parent_id = null;
                     } else {
-                        $parent->parents()->withoutGlobalScopes()->update(['rgt' => DB::raw('rgt + 2')]);
+                        $parent->parents()->withoutGlobalScopes()->update(['rgt' => DB::raw('rgt + 2'), 'distance' => DB::raw('distance + 2')]);
                         $parent->rgt = DB::raw('rgt + 2');
+                        $parent->distance = DB::raw('distance + 2');
                         $parent->saveQuietly();
 
                         static::withoutGlobalScopes()->where('lft', '>', $parent->lft)->update(['lft' => DB::raw('lft + 2'), 'rgt' => DB::raw('rgt+2')]);
@@ -79,6 +81,8 @@ trait AdvancedNestedSet
                         $rgtMinus = DB::raw(sprintf('rgt - %s', $shift));
                         $lftPlus = DB::raw(sprintf('lft + %s', $shift));
                         $rgtPlus = DB::raw(sprintf('rgt + %s', $shift));
+                        $distanceMinus = DB::raw(sprintf('distance - %s', $item->rgt - $item->lft));
+                        $distancePlus = DB::raw(sprintf('distance + %s', $item->rgt - $item->lft));
 
                         $depthShift = DB::raw(
                             sprintf(
@@ -87,10 +91,17 @@ trait AdvancedNestedSet
                                 $newParent->depth + 1 == $item->depth ? '0' : abs(($newParent->depth ?: 0) - $item->depth + 1))
                         );
 
-                        $item->parents()->withoutGlobalScopes()->update(['rgt' => $rgtMinus]);
-                        static::withoutGlobalScopes()->where('lft', '>', $item->rgt)->update(['lft' => $lftMinus, 'rgt' => $rgtMinus]);
-                        static::withoutGlobalScopes()->where('lft', '>', (int) optional(static::find($newParent->id))->lft)->whereNotIn('id', $ids)->update(['lft' => $lftPlus, 'rgt' => $rgtPlus]);
-                        static::withoutGlobalScopes()->whereIn('id', array_filter(array_merge($newParentParentsIds, [$newParent->id])))->update(['rgt' => $rgtPlus]);
+                        $item->parents()->withoutGlobalScopes()->update(['rgt' => $rgtMinus, 'distance' => $distanceMinus]);
+                        static::withoutGlobalScopes()
+                            ->where('lft', '>', $item->rgt)
+                            ->update(['lft' => $lftMinus, 'rgt' => $rgtMinus]);
+                        static::withoutGlobalScopes()
+                            ->where('lft', '>', (int) optional(static::find($newParent->id))->lft)
+                            ->whereNotIn('id', $ids)
+                            ->update(['lft' => $lftPlus, 'rgt' => $rgtPlus]);
+                        static::withoutGlobalScopes()
+                            ->whereIn('id', array_filter(array_merge($newParentParentsIds, [$newParent->id])))
+                            ->update(['rgt' => $rgtPlus, 'distance' => $distancePlus]);
 
                         $newParentLft = optional(self::find((int) optional($newParent)->id))->lft;
                         $sign = $item->lft > $newParentLft ? '-' : '+';
@@ -119,53 +130,40 @@ trait AdvancedNestedSet
                 return;
             }
 
-            $table = $this->getTable();
             $shift = (string) ((int) ($this->lft < $afterEl->lft ? abs($this->lft - $afterEl->rgt) - ($this->rgt - $this->lft) : abs($afterEl->rgt - $this->lft) - 1));
             $shiftSign = ($this->lft > $afterEl->lft ? '-' : '+');
             $shiftAfter = $this->lft > $afterEl->lft ? 0 : (string) ((int) ($this->rgt - $this->lft + 1));
             $shiftOther = (string) ((int) ($this->rgt - $this->lft + 1));
             $shiftAfterSign = ($afterEl->lft > $this->lft ? '-' : '+');
-            $minLft = min($this->lft, $afterEl->lft);
-            $maxRgt = max($this->rgt, $afterEl->rgt);
 
-            $sql = sprintf("UPDATE {$table} SET lft = (
-                    SELECT
-                        CASE 
-                            WHEN lft >= {$this->lft} AND rgt <= {$this->rgt} 
-                            THEN lft{$shiftSign}{$shift} 
-                            WHEN lft >= {$afterEl->lft} AND rgt <= {$afterEl->rgt} 
-                            THEN lft{$shiftAfterSign}{$shiftAfter} 
-                            ELSE lft{$shiftAfterSign}{$shiftOther} 
-                        END
-                    FROM
-                    {$table} as t
-                    WHERE t.id={$table}.id
-                ), rgt = ( SELECT 
-                        CASE 
-                            WHEN lft >= {$this->lft} AND rgt <= {$this->rgt} 
-                            THEN rgt{$shiftSign}{$shift} 
-                            WHEN lft >= {$afterEl->lft} AND rgt <= {$afterEl->rgt} 
-                            THEN rgt{$shiftAfterSign}{$shiftAfter} 
-                            ELSE rgt{$shiftAfterSign}{$shiftOther} 
-                        END
-                    FROM
-                    {$table} as t2
-                    WHERE t2.id={$table}.id
-                ) WHERE lft >= {$minLft} AND rgt <= {$maxRgt}"
-            );
+            self::withoutGlobalScopes()
+                ->where('lft', '>=', min($this->lft, $afterEl->lft))
+                ->where('rgt', '<=', max($this->rgt, $afterEl->rgt))
+                ->update(
+                    [
+                        'lft' => DB::raw("CASE 
+                            WHEN lft >= {$this->lft} AND rgt <= {$this->rgt}
+                            THEN lft{$shiftSign}{$shift}
+                            WHEN lft >= {$afterEl->lft} AND rgt <= {$afterEl->rgt}
+                            THEN lft{$shiftAfterSign}{$shiftAfter}
+                            ELSE lft{$shiftAfterSign}{$shiftOther}
+                        END")
+                    ]
+                );
 
-            DB::update($sql);
+            self::withoutGlobalScopes()->update(['rgt' => DB::raw('lft + distance')]);
         });
     }
 
     public static function print()
     {
         printf("\n----------------------------------------------------------------------\n");
-        printf("%-25s %10s %10s %10s %10s\n", 'EL', 'LEFT', 'RIGHT', 'PAREN', 'DEPTH');
+        printf("%-25s %10s %10s %10s %10s %10s\n", 'EL', 'LEFT', 'RIGHT', 'PAREN', 'DEPTH', 'DISTANCE');
         self::all()->sortBy('lft')->each(
-            fn ($el) => printf("%-25s %10s %10s %10s %10s\n", sprintf('%s ID:%2s %10s', str_repeat('-', $el->depth), $el->id, $el->name), $el->lft, $el->rgt, $el->parent_id, $el->depth)
+            fn ($el) => printf("%-25s %10s %10s %10s %10s %10s\n",
+                sprintf('%s ID:%2s %10s', str_repeat('-', $el->depth), $el->id, $el->name), $el->lft, $el->rgt, $el->parent_id, $el->depth, $el->distance)
         );
-        printf("----------------------------------------------------------------------\n");
+        printf("\n----------------------------------------------------------------------\n");
     }
 
     public static function lock($call)
