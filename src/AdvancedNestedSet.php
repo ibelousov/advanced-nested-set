@@ -147,7 +147,7 @@ trait AdvancedNestedSet
                             WHEN lft >= {$afterEl->lft} AND rgt <= {$afterEl->rgt}
                             THEN lft{$shiftAfterSign}{$shiftAfter}
                             ELSE lft{$shiftAfterSign}{$shiftOther}
-                        END")
+                        END"),
                     ]
                 );
 
