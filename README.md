@@ -2,7 +2,7 @@
 
 ## Attention
 
-**FOR NOW POSTGRESQL IS THE ONLY SUPPORTED DATABASE**
+**FOR NOW POSTGRESQL, MYSQL AND SQLITE IS ONLY SUPPORTED DATABASES**
 
 ## Overview
 
@@ -64,6 +64,8 @@ use \Ibelousov\AdvancedNestedSet\AdvancedNestedSet;
 class Category extends Model
 {
     use AdvancedNestedSet;
+
+    protected $fillable = [/*...Your columns..*/ 'lft','rgt','parent_id','depth','distance'];
 }
 ```
 
