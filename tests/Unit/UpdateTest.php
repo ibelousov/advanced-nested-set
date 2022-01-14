@@ -95,7 +95,6 @@ class UpdateTest extends TestCase
         $this->assertEquals(8, $test5->fresh()->rgt);
         $this->assertEquals(9, $test1->fresh()->lft);
         $this->assertEquals(10, $test1->fresh()->rgt);
-
     }
 
     /** @test */
