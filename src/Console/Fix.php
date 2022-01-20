@@ -44,7 +44,7 @@ class Fix extends Command
     {
         $this->info('Get entries from database...');
         $this->records = collect(
-            DB::table($this->argument('table'))->select('id', 'lft', 'rgt', 'parent_id', 'depth')->orderBy('lft')->get()
+            DB::table($this->argument('table'))->select('id', 'lft', 'rgt', 'parent_id', 'depth', 'distance')->orderBy('lft')->get()
         )->groupBy('parent_id');
 
         $this->info('Building tree...');
