@@ -21,18 +21,16 @@ class Parents extends Relation
     {
         return $query->leftJoin(
             DB::raw("(SELECT MAX(lft) as max_lft FROM $table WHERE lft < $lft AND depth < $depth GROUP BY depth) AS $subTable"),
-            "$subTable.max_lft", "=", "$table.lft"
+            "$subTable.max_lft", '=', "$table.lft"
         )->whereNotNull("$subTable.max_lft");
     }
 
     public function addConstraints()
     {
         if ($this->parent->lft && $this->parent->rgt && $this->parent->depth) {
-
             $this->parentWhereClause(
-                $this->query, $this->parent->getModel()->getTable(), $this->parent->getModel()->getTable() . time(), $this->parent->lft, $this->parent->depth
+                $this->query, $this->parent->getModel()->getTable(), $this->parent->getModel()->getTable().time(), $this->parent->lft, $this->parent->depth
             );
-
         }
     }
 
@@ -42,7 +40,7 @@ class Parents extends Relation
             foreach ($items as $key => $item) {
                 $query->{$key == 0 ? 'where' : 'orWhere'}(function ($query) use ($item) {
                     $this->parentWhereClause(
-                        $query, $item->getTable(), $item->getTable() . time(), (int)$item->lft, (int)$item->depth,
+                        $query, $item->getTable(), $item->getTable().time(), (int) $item->lft, (int) $item->depth,
                     );
                 });
             }
