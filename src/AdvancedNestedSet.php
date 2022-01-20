@@ -185,10 +185,10 @@ trait AdvancedNestedSet
         }
     }
 
-    public function newCollection(array $models = [])
-    {
-        return new TreeCollection($models);
-    }
+//    public function newCollection(array $models = [])
+//    {
+//        return new TreeCollection($models);
+//    }
 
     /**
      * return true if nested set is correct.
