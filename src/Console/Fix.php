@@ -77,14 +77,16 @@ class Fix extends Command
             if (
                 ($element['data']['lft'] != $lft + 1) ||
                 ($element['data']['rgt'] != $lft + ($element['children_count'] ?? 0) * 2 + 2) ||
+                ($element['data']['distance'] != ($element['children_count'] ?? 0) * 2 + 1) ||
                 ($element['data']['depth'] != $element['depth'])
             ) {
                 $this->sql[] = sprintf(
-                    'UPDATE %s SET lft=%s, rgt=%s, depth=%s WHERE id=%s',
+                    'UPDATE %s SET lft=%s, rgt=%s, depth=%s, distance=%s, WHERE id=%s',
                     $this->argument('table'),
                     $lft + 1,
                     $lft + ($element['children_count'] ?? 0) * 2 + 2,
                     $element['depth'],
+                    ($element['children_count'] ?? 0) * 2 + 1,
                     $element['id']
                 );
             }
