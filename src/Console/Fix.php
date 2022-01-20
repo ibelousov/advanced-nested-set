@@ -75,10 +75,10 @@ class Fix extends Command
     {
         foreach ($tree as $element) {
             if (
-                ($element['data']['lft'] != $lft + 1) ||
-                ($element['data']['rgt'] != $lft + ($element['children_count'] ?? 0) * 2 + 2) ||
-                ($element['data']['distance'] != ($element['children_count'] ?? 0) * 2 + 1) ||
-                ($element['data']['depth'] != $element['depth'])
+                ($element['data']->lft != $lft + 1) ||
+                ($element['data']->rgt != $lft + ($element['children_count'] ?? 0) * 2 + 2) ||
+                ($element['data']->distance != ($element['children_count'] ?? 0) * 2 + 1) ||
+                ($element['data']->depth != $element['depth'])
             ) {
                 $this->sql[] = sprintf(
                     'UPDATE %s SET lft=%s, rgt=%s, depth=%s, distance=%s, WHERE id=%s',
