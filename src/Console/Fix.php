@@ -81,7 +81,7 @@ class Fix extends Command
                 ($element['data']->depth != $element['depth'])
             ) {
                 $this->sql[] = sprintf(
-                    'UPDATE %s SET lft=%s, rgt=%s, depth=%s, distance=%s, WHERE id=%s',
+                    'UPDATE %s SET lft=%s, rgt=%s, depth=%s, distance=%s WHERE id=%s',
                     $this->argument('table'),
                     $lft + 1,
                     $lft + ($element['children_count'] ?? 0) * 2 + 2,
