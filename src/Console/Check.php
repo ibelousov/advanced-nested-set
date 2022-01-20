@@ -43,7 +43,7 @@ class Check extends Command
     public function handle()
     {
         try {
-            $errors = CorrectnessChecker::getErrors($this->argument('table'));
+            $errors = CorrectnessChecker::errors($this->argument('table'));
 
             if (count($errors)) {
                 $this->error(sprintf('Tree is broken, errors count: %s', count($errors)));
