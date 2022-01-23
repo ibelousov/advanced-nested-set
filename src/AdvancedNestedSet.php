@@ -30,8 +30,8 @@ trait AdvancedNestedSet
 
     public static function bootAdvancedNestedSet()
     {
-        if (! in_array((new static)->getConnection()->getName(), self::$SUPPORTED_DRIVERS)) {
-            throw new UnsupportedDatabaseException((new static)->getConnection()->getName());
+        if (! in_array((new static)->getConnection()->getDriverName(), self::$SUPPORTED_DRIVERS)) {
+            throw new UnsupportedDatabaseException((new static)->getConnection()->getDriverName());
         }
 
         static::created(function ($item) {
