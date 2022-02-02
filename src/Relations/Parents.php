@@ -19,10 +19,10 @@ class Parents extends Relation
 
     protected function parentWhereClause($query, $table, $subTable, $lft, $depth)
     {
-        return $query->leftJoin(
+        return $query->join(
             DB::raw("(SELECT MAX(lft) as max_lft FROM $table WHERE lft < $lft AND depth < $depth GROUP BY depth) AS $subTable"),
             "$subTable.max_lft", '=', "$table.lft"
-        )->whereNotNull("$subTable.max_lft");
+        );
     }
 
     public function addConstraints()
