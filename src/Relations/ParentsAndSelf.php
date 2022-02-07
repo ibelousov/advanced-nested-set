@@ -19,8 +19,8 @@ class ParentsAndSelf extends Relation
 
     protected function parentWhereClause($query, $table, $subTable, $lft, $depth)
     {
-        $subTable = str_replace('.','_', $subTable);
-        
+        $subTable = str_replace('.', '_', $subTable);
+
         return $query->join(
             DB::raw("(SELECT MAX(lft) as max_lft FROM $table WHERE lft <= $lft AND depth <= $depth GROUP BY depth) AS $subTable"),
             "$subTable.max_lft", '=', "$table.lft"
