@@ -171,24 +171,26 @@ trait AdvancedNestedSet
         $lockName = env('ADVANCED_NESTED_LOCK_NAME', AdvancedNestedSet::$ADVANCED_NESTED_SET_LOCK_NAME).static::class;
         $blockWait = env('ADVANCED_NESTED_LOCK_WAIT', AdvancedNestedSet::$ADVANCED_NESTED_LOCK_WAIT);
         $blockDelay = env('ADVANCED_NESTED_LOCK_DELAY', self::$ADVANCED_NESTED_LOCK_DELAY);
+        $exceptionHandler = env('ADVANCED_NESTED_LOCK_EXCEPTION_HANDLER', null);
 
-        if ($blockWait) {
-            Cache::lock($lockName)->block($blockWait, function () use ($call) {
+        try {
+            if ($blockWait) {
+                Cache::lock($lockName)->block($blockWait, function () use ($call) {
+                    $call();
+                });
+            } else {
                 $call();
-            });
-        } else {
-            $call();
+            }
+        } catch (\Exception $exception) {
+              if(class_exists((string)$exceptionHandler)) {
+                  $exceptionHandler::dispatch();
+              }
         }
 
         if ($blockDelay) {
             usleep($blockDelay);
         }
     }
-
-//    public function newCollection(array $models = [])
-//    {
-//        return new TreeCollection($models);
-//    }
 
     /**
      * return true if nested set is correct.
